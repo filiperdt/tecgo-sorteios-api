@@ -30,7 +30,7 @@ public class Rifa {
 	private String titulo;
 	@Column(nullable = false)
 	private BigDecimal valor;
-	private LocalDateTime data_sorteio;
+	private LocalDateTime dataSorteio;
 	
 	@JsonBackReference // Anotação necessária para não cair em loop infinito
 	@OneToMany(mappedBy = "rifa", cascade = CascadeType.ALL)

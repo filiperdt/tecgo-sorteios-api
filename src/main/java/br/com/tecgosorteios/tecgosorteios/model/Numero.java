@@ -33,7 +33,7 @@ public class Numero {
 	@Column(nullable = false, length = 15)
 	@Enumerated(EnumType.STRING)
 	private EnumStatus status;
-	private LocalDateTime data_compra;
+	private LocalDateTime dataCompra;
 	
 	@OneToOne(mappedBy = "numero")
 	private Premio premio;
