@@ -32,8 +32,8 @@ public class PremioRequestDto {
 	private String video;
 	
 	@PositiveOrZero(message = "{premio.rifa.positiveorzero}")
-	private RifaRequestDto rifa;
+	private Long rifa;
 	
 	@PositiveOrZero(message = "{premio.numero.positiveorzero}")
-	private NumeroRequestDto numero;
+	private Long numero;
 }

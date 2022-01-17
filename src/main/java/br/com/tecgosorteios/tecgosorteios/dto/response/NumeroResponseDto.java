@@ -22,8 +22,6 @@ public class NumeroResponseDto {
 	private EnumStatus status;
 	private LocalDateTime dataCompra;
 	
-	private PremioResponseDto premio;
-	
 	private RifaResponseDto rifa;
 	
 	private UsuarioResponseDto usuario;
