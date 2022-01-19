@@ -1,5 +1,6 @@
 package br.com.tecgosorteios.tecgosorteios.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,14 +13,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import br.com.tecgosorteios.tecgosorteios.dto.request.NumeroRequestDto;
+import br.com.tecgosorteios.tecgosorteios.dto.request.UsuarioCompraRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.NumeroResponseDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.RifaResponseDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.UsuarioResponseDto;
 import br.com.tecgosorteios.tecgosorteios.model.EnumStatus;
 import br.com.tecgosorteios.tecgosorteios.model.Numero;
 import br.com.tecgosorteios.tecgosorteios.model.Rifa;
+import br.com.tecgosorteios.tecgosorteios.model.Usuario;
 import br.com.tecgosorteios.tecgosorteios.repository.NumeroRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.RifaRepository;
+import br.com.tecgosorteios.tecgosorteios.repository.UsuarioRepository;
 import net.minidev.json.JSONObject;
 
 @Service
@@ -27,11 +31,13 @@ public class NumeroServiceImpl implements NumeroService {
 	@Autowired
 	private NumeroRepository numeroRepository;
 	@Autowired
+	private RifaRepository rifaRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+	@Autowired
 	private RifaServiceImpl rifaServiceImpl;
 	@Autowired
 	private UsuarioServiceImpl usuarioServiceImpl;
-	@Autowired
-	private RifaRepository rifaRepository;
 	
 	public ResponseEntity<JSONObject> retornaJsonMensagem(JSONObject msgResposta, boolean erro, HttpStatus httpStatus) {
 		msgResposta.put("erro", erro);
@@ -61,7 +67,7 @@ public class NumeroServiceImpl implements NumeroService {
 			
 			Numero numero = mapDtoParaEntity(numeroRequestDto, new Numero(), rifa);
 			
-			numero.setStatus(EnumStatus.DISPONÍVEL);
+			numero.setStatus(EnumStatus.RESERVADO);
 			Numero numeroSalvo = numeroRepository.save(numero);
 			UsuarioResponseDto usuarioResponseDto = numeroSalvo.getUsuario() != null? usuarioServiceImpl.mapEntityParaDto(numeroSalvo.getUsuario()) : null;
 			NumeroResponseDto numeroResponseDtoSalvo = mapEntityParaDto(numeroSalvo, rifaServiceImpl.mapEntityParaDto(rifa), usuarioResponseDto);
@@ -163,5 +169,47 @@ public class NumeroServiceImpl implements NumeroService {
 		.build();
 		
 		return numero;
+	}
+	
+	@Transactional
+	public ResponseEntity<?> comprarNumero(UsuarioCompraRequestDto usuarioCompraRequestDto) {
+		JSONObject msgResposta = new JSONObject();
+		
+		Optional<Usuario> optionalUsuario = usuarioRepository.findByEmail(usuarioCompraRequestDto.getEmail());
+		
+		if(optionalUsuario.isPresent()) {
+			Optional<Numero> optionalNumero = numeroRepository.findByNumero(usuarioCompraRequestDto.getNumero());
+			
+			if(!optionalNumero.isPresent()) {
+				Optional<Rifa> optionalRifa = rifaRepository.findById(usuarioCompraRequestDto.getRifa());
+				
+				if(optionalRifa.isPresent()) {
+					Usuario usuario = optionalUsuario.get();
+					Rifa rifa = optionalRifa.get();
+					String numeroString = usuarioCompraRequestDto.getNumero();
+					
+					Numero numero = Numero.builder()
+					.numero(numeroString)
+					.status(EnumStatus.RESERVADO)
+					.dataCompra(LocalDateTime.now())
+					.rifa(rifa)
+					.usuario(usuario)
+					.build();
+					
+					Numero numeroSalvo = numeroRepository.save(numero);
+					NumeroResponseDto numeroResponseDto = mapEntityParaDto(numeroSalvo);
+					return ResponseEntity.ok().body(numeroResponseDto);
+				}
+				
+				msgResposta.put("message", "Rifa #"+usuarioCompraRequestDto.getRifa()+" não existe no banco de dados!");
+				return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
+			}
+			
+			msgResposta.put("message", "Número #"+usuarioCompraRequestDto.getNumero()+" indisponível!");
+			return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
+		}
+		
+		msgResposta.put("message", "Usuário inexistente no banco de dados!");
+		return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
 	}
 }

@@ -22,6 +22,22 @@ public class UsuarioServiceImpl implements UsuarioService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 	
+	public JSONObject verificaExistenciaCreate(String email, JSONObject msgResposta){
+		if(usuarioRepository.findByEmail(email).isPresent()) {
+			msgResposta.put("email", "Email '" + email + "' já existe no banco!");
+		}
+		
+		return msgResposta;
+	}
+	
+	public JSONObject verificaExistenciaUpdate(String email, JSONObject msgResposta, Usuario usuario){
+		if(usuarioRepository.findByEmail(email).isPresent()) {
+			msgResposta.put("email", "Email '" + email + "' já existe no banco!");
+		}
+		
+		return msgResposta;
+	}
+	
 	public ResponseEntity<JSONObject> retornaJsonMensagem(JSONObject msgResposta, boolean erro, HttpStatus httpStatus) {
 		msgResposta.put("erro", erro);
 		return ResponseEntity.status(httpStatus).body(msgResposta);
@@ -41,15 +57,25 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Transactional
 	public ResponseEntity<?> create(UsuarioRequestDto usuarioRequestDto) {
-		usuarioRequestDto.setNome(usuarioRequestDto.getNome().trim());
-		usuarioRequestDto.setSobrenome(usuarioRequestDto.getSobrenome().trim());
+		String email = usuarioRequestDto.getEmail();
 		
-		Usuario usuario = new Usuario();
-		usuario = mapDtoParaEntity(usuarioRequestDto, usuario);
+		JSONObject msgResposta = new JSONObject();
 		
-		Usuario usuarioSalvo = this.usuarioRepository.save(usuario);
-		UsuarioResponseDto usuarioResponseDto = mapEntityParaDto(usuarioSalvo);
-		return ResponseEntity.created(null).body(usuarioResponseDto);
+		msgResposta = verificaExistenciaCreate(email, msgResposta);
+		
+		if(msgResposta.size() == 0) {
+			usuarioRequestDto.setNome(usuarioRequestDto.getNome().trim());
+			usuarioRequestDto.setSobrenome(usuarioRequestDto.getSobrenome().trim());
+			
+			Usuario usuario = new Usuario();
+			usuario = mapDtoParaEntity(usuarioRequestDto, usuario);
+			
+			Usuario usuarioSalvo = this.usuarioRepository.save(usuario);
+			UsuarioResponseDto usuarioResponseDto = mapEntityParaDto(usuarioSalvo);
+			return ResponseEntity.created(null).body(usuarioResponseDto);
+		}else {
+			return retornaJsonMensagem(msgResposta, true, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	public ResponseEntity<?> read(Long id) {
@@ -71,23 +97,30 @@ public class UsuarioServiceImpl implements UsuarioService {
 		JSONObject msgResposta = new JSONObject(); 
 		
 		if(optional.isPresent()) {
-			usuarioRequestDto.setNome(usuarioRequestDto.getNome().trim());
-			usuarioRequestDto.setSobrenome(usuarioRequestDto.getSobrenome().trim());
+			String email = usuarioRequestDto.getEmail();
 			
-			Usuario usuario = new Usuario();
-			usuario = mapDtoParaEntity(usuarioRequestDto, usuario); 
+			msgResposta = verificaExistenciaCreate(email, msgResposta);
 			
-			usuario.setId(optional.get().getId());
-			
-			Usuario usuarioSalvo = this.usuarioRepository.save(usuario);
-			UsuarioResponseDto usuarioResponseDto = mapEntityParaDto(usuarioSalvo);
-			return ResponseEntity.ok().body(usuarioResponseDto);
+			if(msgResposta.size() == 0) {
+				usuarioRequestDto.setNome(usuarioRequestDto.getNome().trim());
+				usuarioRequestDto.setSobrenome(usuarioRequestDto.getSobrenome().trim());
+				
+				Usuario usuario = new Usuario();
+				usuario = mapDtoParaEntity(usuarioRequestDto, usuario); 
+				
+				usuario.setId(optional.get().getId());
+				
+				Usuario usuarioSalvo = this.usuarioRepository.save(usuario);
+				UsuarioResponseDto usuarioResponseDto = mapEntityParaDto(usuarioSalvo);
+				return ResponseEntity.ok().body(usuarioResponseDto);
+			}else {
+				return retornaJsonMensagem(msgResposta, true, HttpStatus.BAD_REQUEST);
+			}
 		}
 		
 		msgResposta.put("message", "Usuário #"+id+" não existe no banco de dados!");
 		return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
 	}
-	
 
 	public ResponseEntity<?> delete(Long id) {
 		Optional<Usuario> optional = this.usuarioRepository.findById(id);
@@ -103,7 +136,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 		return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
 	}
 	
-	
 	public UsuarioResponseDto mapEntityParaDto(Usuario usuario) {
 		UsuarioResponseDto usuarioResponseDto = UsuarioResponseDto.builder()
 		.id(usuario.getId())
@@ -116,7 +148,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 		
 		return usuarioResponseDto;
 	}
-	
 	
 	public Usuario mapDtoParaEntity(UsuarioRequestDto usuarioRequestDto, Usuario usuario) {
 		usuario = Usuario.builder()

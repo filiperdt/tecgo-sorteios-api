@@ -32,11 +32,12 @@ public class Numero {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(nullable = false, length = 6)
+	@Column(nullable = false, length = 5)
 	private String numero;
 	@Column(nullable = false, length = 15)
 	@Enumerated(EnumType.STRING)
 	private EnumStatus status;
+	@Column(nullable = false)
 	private LocalDateTime dataCompra;
 	
 	@OneToOne(mappedBy = "numero")
@@ -49,6 +50,6 @@ public class Numero {
 	
 	@JsonManagedReference
 	@ManyToOne
-	@JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "FK_Numeros_Usuarios"))
+	@JoinColumn(name = "usuario_id", nullable = false, foreignKey = @ForeignKey(name = "FK_Numeros_Usuarios"))
 	private Usuario usuario;
 }

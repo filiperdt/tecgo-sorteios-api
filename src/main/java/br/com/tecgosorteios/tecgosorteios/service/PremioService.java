@@ -2,6 +2,7 @@ package br.com.tecgosorteios.tecgosorteios.service;
 
 import org.springframework.http.ResponseEntity;
 
+import br.com.tecgosorteios.tecgosorteios.dto.request.PremioGanhadorRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.request.PremioRequestDto;
 
 public interface PremioService {
@@ -14,4 +15,6 @@ public interface PremioService {
 	public ResponseEntity<?> update(Long id, PremioRequestDto premioRequestDto);
 	
 	public ResponseEntity<?> delete(Long id);
+	
+	public void atribuirGanhador(PremioGanhadorRequestDto premioGanhadorRequestDto);
 }

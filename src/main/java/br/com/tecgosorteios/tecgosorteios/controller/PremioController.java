@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.tecgosorteios.tecgosorteios.dto.request.PremioGanhadorRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.request.PremioRequestDto;
 import br.com.tecgosorteios.tecgosorteios.service.PremioService;
 import net.minidev.json.JSONObject;
@@ -89,4 +90,17 @@ public class PremioController {
 		ResponseEntity<?> responseEntity = premioService.delete(id);
 		return responseEntity;
 	}
+	
+	@PostMapping("/ganhador")
+	@ResponseBody
+	public ResponseEntity<?> atribuirGanhador(@Valid @RequestBody PremioGanhadorRequestDto requisicao, BindingResult bindingResult) {
+		if(bindingResult.hasErrors()) {
+			ResponseEntity<JSONObject> responseEntity = geraErroDoBindingResult(bindingResult);
+			return responseEntity;
+		}else {
+			premioService.atribuirGanhador(requisicao);
+			return ResponseEntity.ok().body(null);
+		}
+	}
+	
 }

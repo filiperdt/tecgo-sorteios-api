@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import br.com.tecgosorteios.tecgosorteios.dto.request.RifaRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.RifaResponseDto;
 import br.com.tecgosorteios.tecgosorteios.model.Rifa;
+import br.com.tecgosorteios.tecgosorteios.repository.NumeroRepository;
+import br.com.tecgosorteios.tecgosorteios.repository.PremioRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.RifaRepository;
 import net.minidev.json.JSONObject;
 
@@ -21,6 +23,25 @@ import net.minidev.json.JSONObject;
 public class RifaServiceImpl implements RifaService {	
 	@Autowired
 	private RifaRepository rifaRepository;
+	@Autowired
+	private PremioRepository premioRepository;
+	@Autowired
+	private NumeroRepository numeroRepository;
+	
+//	public void iniciarAgendador() {
+//		Timer timer = new Timer();
+//		Agendador agendador = new Agendador();
+//		timer.schedule(agendador, 0, 2000);
+//		
+//		while(true){
+//			System.out.println("Agendador em execução ...");
+//			try {
+//				Thread.sleep(86400000); // 1 dia em milissegundos
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}		
+//	}
 	
 	public ResponseEntity<JSONObject> retornaJsonMensagem(JSONObject msgResposta, boolean erro, HttpStatus httpStatus) {
 		msgResposta.put("erro", erro);
@@ -91,6 +112,9 @@ public class RifaServiceImpl implements RifaService {
 		JSONObject msgResposta = new JSONObject();
 		
 		if(optional.isPresent()) {
+			premioRepository.deletarTodosPorRifa(id);
+			numeroRepository.deletarTodosPorRifa(id);
+			
 			rifaRepository.deleteById(id);
 			msgResposta.put("message", "Rifa #"+id+" excluída com sucesso!");
 			return retornaJsonMensagem(msgResposta, false, HttpStatus.OK);

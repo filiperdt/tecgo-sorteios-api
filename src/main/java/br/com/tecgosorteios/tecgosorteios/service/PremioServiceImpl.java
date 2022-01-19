@@ -3,6 +3,7 @@ package br.com.tecgosorteios.tecgosorteios.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import javax.transaction.Transactional;
 
@@ -11,12 +12,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import br.com.tecgosorteios.tecgosorteios.dto.request.PremioGanhadorRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.request.PremioRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.NumeroResponseDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.PremioResponseDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.RifaResponseDto;
+import br.com.tecgosorteios.tecgosorteios.model.EnumStatus;
+import br.com.tecgosorteios.tecgosorteios.model.Numero;
 import br.com.tecgosorteios.tecgosorteios.model.Premio;
 import br.com.tecgosorteios.tecgosorteios.model.Rifa;
+import br.com.tecgosorteios.tecgosorteios.repository.NumeroRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.PremioRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.RifaRepository;
 import net.minidev.json.JSONObject;
@@ -31,6 +36,8 @@ public class PremioServiceImpl implements PremioService {
 	private NumeroServiceImpl numeroServiceImpl;
 	@Autowired
 	private RifaRepository rifaRepository;
+	@Autowired
+	private NumeroRepository numeroRepository;
 	
 	public ResponseEntity<JSONObject> retornaJsonMensagem(JSONObject msgResposta, boolean erro, HttpStatus httpStatus) {
 		msgResposta.put("erro", erro);
@@ -165,5 +172,68 @@ public class PremioServiceImpl implements PremioService {
 		.build();
 		
 		return premio;
+	}
+	
+	@Transactional
+	public void atribuirGanhador(PremioGanhadorRequestDto premioGanhadorRequestDto) {
+		Optional<List<Rifa>> optionalListaRifa = rifaRepository.encontrarTodasRifasPorDataSorteio(premioGanhadorRequestDto.getDataSorteioAtual());
+		
+		if(optionalListaRifa.isPresent()) {
+			List<Rifa> listaRifa = optionalListaRifa.get();
+			
+			listaRifa.stream().forEach(rifa -> {
+				premioGanhadorRequestDto.getListaNumeroRequisicao().stream().forEachOrdered(numeroRequisicao -> {
+					Optional<Numero> optionalNumero = numeroRepository.encontrarPorNumeroERifaEStatus(numeroRequisicao, Long.valueOf(rifa.getId()), "PAGO");
+
+					if(optionalNumero.isPresent()) {
+						Numero numero = optionalNumero.get();
+						
+						Optional<Premio> optionalPremioDaRifaNaoSorteado = premioRepository.encontrarTodosPremiosPorRifaNaoSorteados(rifa.getId());
+						
+						if(optionalPremioDaRifaNaoSorteado.isPresent()) {
+							Premio premioDaRifaNaoSorteado = optionalPremioDaRifaNaoSorteado.get();
+							
+							numero.setStatus(EnumStatus.SORTEADO);
+							numeroRepository.save(numero);
+							
+							premioDaRifaNaoSorteado.setNumero(numero);
+							premioRepository.save(premioDaRifaNaoSorteado);
+						}
+					}else {
+						sortear(rifa.getId());
+					}
+				});
+				Optional<Premio> optionalPremioDaRifaAindaNaoSorteado = premioRepository.encontrarTodosPremiosPorRifaNaoSorteados(rifa.getId());
+				if(optionalPremioDaRifaAindaNaoSorteado.isPresent()) {
+					rifa.setDataSorteio(premioGanhadorRequestDto.getDataProximoSorteio());
+					rifaRepository.save(rifa);
+				}
+			});
+		}
+	}
+	
+	@Transactional
+	public void sortear(Long rifaId) {
+		Optional<List<Numero>> optionalTodosNumerosPagos = numeroRepository.encontrarTodosNumerosPorRifaEStatus(rifaId, "PAGO");
+		if(optionalTodosNumerosPagos.isPresent()) {
+			List<Numero> listaTodosNumerosPagos = optionalTodosNumerosPagos.get();
+
+			if(listaTodosNumerosPagos.size() > 0) {
+				Random random = new Random();
+				int numeroAleatório = random.nextInt(listaTodosNumerosPagos.size());
+				Numero numeroSorteado = listaTodosNumerosPagos.get(numeroAleatório);
+				Optional<Premio> optionalPremioDaRifaNaoSorteado = premioRepository.encontrarTodosPremiosPorRifaNaoSorteados(numeroSorteado.getRifa().getId());
+				
+				if(optionalPremioDaRifaNaoSorteado.isPresent()) {
+					Premio premioDaRifaNaoSorteado = optionalPremioDaRifaNaoSorteado.get();
+					
+					premioDaRifaNaoSorteado.setNumero(numeroSorteado);
+					premioRepository.save(premioDaRifaNaoSorteado);
+					
+					numeroSorteado.setStatus(EnumStatus.SORTEADO);
+					numeroRepository.save(numeroSorteado);
+				}
+			}
+		}
 	}
 }

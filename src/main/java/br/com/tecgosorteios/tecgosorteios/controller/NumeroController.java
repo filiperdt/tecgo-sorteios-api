@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.tecgosorteios.tecgosorteios.dto.request.NumeroRequestDto;
+import br.com.tecgosorteios.tecgosorteios.dto.request.UsuarioCompraRequestDto;
 import br.com.tecgosorteios.tecgosorteios.service.NumeroService;
 import net.minidev.json.JSONObject;
 
@@ -88,5 +89,17 @@ public class NumeroController {
 	public ResponseEntity<?> delete(@PathVariable Long id) {
 		ResponseEntity<?> responseEntity = numeroService.delete(id);
 		return responseEntity;
+	}
+	
+	@PostMapping("/comprar-numero")
+	@ResponseBody
+	public ResponseEntity<?> comprarNumero(@Valid @RequestBody UsuarioCompraRequestDto requisicao, BindingResult bindingResult) {
+		if(bindingResult.hasErrors()) {
+			ResponseEntity<JSONObject> responseEntity = geraErroDoBindingResult(bindingResult);
+			return responseEntity;
+		}else {
+			ResponseEntity<?> responseEntity = numeroService.comprarNumero(requisicao);
+			return responseEntity;
+		}
 	}
 }

@@ -1,7 +1,7 @@
 package br.com.tecgosorteios.tecgosorteios.model;
 
 public enum EnumStatus {
-	DISPONÍVEL, RESERVADO, PAGO;
+	RESERVADO, PAGO, SORTEADO;
 	
 	@Override
 	public String toString() {
