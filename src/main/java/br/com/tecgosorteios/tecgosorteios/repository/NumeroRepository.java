@@ -29,4 +29,8 @@ public interface NumeroRepository extends JpaRepository<Numero, Long> {
 	@Query(nativeQuery = true,
 			value = "SELECT * FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 AND status = ?2")
 	public Optional<List<Numero>> encontrarTodosNumerosPorRifaEStatus(Long rifa, String status);
+	
+	@Query(nativeQuery = true,
+			value = "SELECT * FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 order by numero")
+	public Optional<List<Numero>> encontrarTodosNumerosPorRifa(Long id);
 }

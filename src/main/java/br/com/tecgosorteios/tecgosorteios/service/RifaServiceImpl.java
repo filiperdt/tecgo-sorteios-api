@@ -1,5 +1,7 @@
 package br.com.tecgosorteios.tecgosorteios.service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import br.com.tecgosorteios.tecgosorteios.dto.request.RifaRequestDto;
 import br.com.tecgosorteios.tecgosorteios.dto.response.RifaResponseDto;
+import br.com.tecgosorteios.tecgosorteios.model.Numero;
+import br.com.tecgosorteios.tecgosorteios.model.Premio;
 import br.com.tecgosorteios.tecgosorteios.model.Rifa;
 import br.com.tecgosorteios.tecgosorteios.repository.NumeroRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.PremioRepository;
@@ -66,6 +70,8 @@ public class RifaServiceImpl implements RifaService {
 		
 		Rifa rifa = new Rifa();
 		rifa = mapDtoParaEntity(rifaRequestDto, rifa);
+		
+		rifa.setDataCriacao(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		Rifa rifaSalvo = this.rifaRepository.save(rifa);
 		RifaResponseDto rifaResponseDto = mapEntityParaDto(rifaSalvo);
@@ -124,11 +130,22 @@ public class RifaServiceImpl implements RifaService {
 		return retornaJsonMensagem(msgResposta, true, HttpStatus.NOT_FOUND);
 	}
 	
+	public ResponseEntity<?> encontrarTodosPremiosPorRifa(Long id) {
+		Optional<List<Premio>> premios = premioRepository.encontrarTodosPremiosPorRifa(id);
+		return ResponseEntity.ok().body(premios);
+	}
+
+	public ResponseEntity<?> encontrarTodosNumerosPorRifa(Long id) {
+		Optional<List<Numero>> numeros = numeroRepository.encontrarTodosNumerosPorRifa(id);
+		return ResponseEntity.ok().body(numeros);
+	}
+	
 	public RifaResponseDto mapEntityParaDto(Rifa rifa) {
 		RifaResponseDto rifaResponseDto = RifaResponseDto.builder()
 		.id(rifa.getId())
 		.titulo(rifa.getTitulo())
 		.valor(rifa.getValor().toString())
+		.dataCriacao(rifa.getDataCriacao())
 		.dataSorteio(rifa.getDataSorteio())
 		.build();
 		

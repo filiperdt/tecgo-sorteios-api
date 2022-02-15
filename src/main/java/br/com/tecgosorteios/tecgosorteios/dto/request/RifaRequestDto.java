@@ -32,6 +32,6 @@ public class RifaRequestDto {
 	private BigDecimal valor;
 	@NotNull(message = "{rifa.dataSorteio.notnull}")
 	@FutureOrPresent(message = "{rifa.dataSorteio.futureorpresent}")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime dataSorteio;
 }

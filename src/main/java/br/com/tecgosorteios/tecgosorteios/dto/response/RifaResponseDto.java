@@ -19,5 +19,6 @@ public class RifaResponseDto {
 	private Long id;
 	private String titulo;
 	private String valor;
+	private LocalDateTime dataCriacao;
 	private LocalDateTime dataSorteio;
 }

@@ -89,4 +89,18 @@ public class RifaController {
 		ResponseEntity<?> responseEntity = rifaService.delete(id);
 		return responseEntity;
 	}
+	
+	@GetMapping("/find-premios/{id}")
+	@ResponseBody
+	public ResponseEntity<?> encontrarTodosPremiosPorRifa(@PathVariable Long id) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarTodosPremiosPorRifa(id);
+		return responseEntity;
+	}
+	
+	@GetMapping("/find-numeros/{id}")
+	@ResponseBody
+	public ResponseEntity<?> encontrarTodosNumerosPorRifa(@PathVariable Long id) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarTodosNumerosPorRifa(id);
+		return responseEntity;
+	}
 }

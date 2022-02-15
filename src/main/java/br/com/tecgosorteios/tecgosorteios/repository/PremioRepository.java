@@ -1,5 +1,6 @@
 package br.com.tecgosorteios.tecgosorteios.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -20,6 +21,10 @@ public interface PremioRepository extends JpaRepository<Premio, Long> {
 	public void deletarTodosPorRifa(Long id);
 	
 	@Query(nativeQuery = true,
-			value = "SELECT * FROM tecgo_sorteios.tbl_premios WHERE rifa_id = ?1 AND numero_id IS null LIMIT 1")
+			value = "SELECT * FROM tecgo_sorteios.tbl_premios WHERE rifa_id = ?1 AND numero_id IS null order by id LIMIT 1")
 	public Optional<Premio> encontrarTodosPremiosPorRifaNaoSorteados(Long id);
+	
+	@Query(nativeQuery = true,
+			value = "SELECT * FROM tecgo_sorteios.tbl_premios WHERE rifa_id = ?1 order by id")
+	public Optional<List<Premio>> encontrarTodosPremiosPorRifa(Long id);
 }

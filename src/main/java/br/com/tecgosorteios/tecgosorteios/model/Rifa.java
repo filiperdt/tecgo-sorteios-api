@@ -34,6 +34,8 @@ public class Rifa {
 	private String titulo;
 	@Column(nullable = false)
 	private BigDecimal valor;
+	@Column(nullable = false)
+	private LocalDateTime dataCriacao;
 	private LocalDateTime dataSorteio;
 	
 	@JsonBackReference // Anotação necessária para não cair em loop infinito

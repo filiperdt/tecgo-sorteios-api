@@ -14,4 +14,8 @@ public interface RifaService {
 	public ResponseEntity<?> update(Long id, RifaRequestDto rifaRequestDto);
 	
 	public ResponseEntity<?> delete(Long id);
+
+	public ResponseEntity<?> encontrarTodosPremiosPorRifa(Long id);
+
+	public ResponseEntity<?> encontrarTodosNumerosPorRifa(Long id);
 }
