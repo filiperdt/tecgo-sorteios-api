@@ -18,9 +18,11 @@ import br.com.tecgosorteios.tecgosorteios.dto.response.RifaResponseDto;
 import br.com.tecgosorteios.tecgosorteios.model.Numero;
 import br.com.tecgosorteios.tecgosorteios.model.Premio;
 import br.com.tecgosorteios.tecgosorteios.model.Rifa;
+import br.com.tecgosorteios.tecgosorteios.model.Usuario;
 import br.com.tecgosorteios.tecgosorteios.repository.NumeroRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.PremioRepository;
 import br.com.tecgosorteios.tecgosorteios.repository.RifaRepository;
+import br.com.tecgosorteios.tecgosorteios.repository.UsuarioRepository;
 import net.minidev.json.JSONObject;
 
 @Service
@@ -31,6 +33,8 @@ public class RifaServiceImpl implements RifaService {
 	private PremioRepository premioRepository;
 	@Autowired
 	private NumeroRepository numeroRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 	
 //	public void iniciarAgendador() {
 //		Timer timer = new Timer();
@@ -138,6 +142,38 @@ public class RifaServiceImpl implements RifaService {
 	public ResponseEntity<?> encontrarTodosNumerosPorRifa(Long id) {
 		Optional<List<Numero>> numeros = numeroRepository.encontrarTodosNumerosPorRifa(id);
 		return ResponseEntity.ok().body(numeros);
+	}
+	
+	public ResponseEntity<?> encontrarTodosNumerosPorRifaEStatus(Long id, String status) {
+		Optional<List<Numero>> numeros = numeroRepository.encontrarTodosNumerosPorRifaEStatus(id, status);
+		return ResponseEntity.ok().body(numeros);
+	}
+
+	public ResponseEntity<?> encontrarQtdeNumerosPorRifaEStatus(Long id, Long idUsuarioLogado) {
+		JSONObject qtdeNumeroPorStatus = new JSONObject();
+		
+		Long qtdeReservado = numeroRepository.encontrarQtdeNumerosPorRifaEStatus(id, "RESERVADO");
+		Long qtdePago = numeroRepository.encontrarQtdeNumerosPorRifaEStatus(id, "PAGO");
+		Long qtdeMeus = numeroRepository.encontrarQtdeNumerosMeusPorRifa(id, idUsuarioLogado);
+		
+		qtdeNumeroPorStatus.put("reservado", qtdeReservado);
+		qtdeNumeroPorStatus.put("pago", qtdePago);
+		qtdeNumeroPorStatus.put("meu", qtdeMeus);
+		
+		return ResponseEntity.ok().body(qtdeNumeroPorStatus);
+	}
+	
+	public ResponseEntity<?> encontrarTodosNumerosMeusPorRifa(Long id, Long idUsuario) {
+		Optional<List<Numero>> numeros = numeroRepository.encontrarTodosNumerosMeusPorRifa(id, idUsuario);
+		return ResponseEntity.ok().body(numeros);
+	}
+
+	public ResponseEntity<?> encontrarTodosUsuariosPorRifa(JSONObject requestBody) {
+		@SuppressWarnings("unchecked")
+		List<Integer> usuarioIds = (List<Integer>) requestBody.get("usuarioIds");
+		
+		Optional<List<Usuario>> usuarios = usuarioRepository.encontrarTodosUsuariosPorRifa(usuarioIds);
+		return ResponseEntity.ok().body(usuarios);
 	}
 	
 	public RifaResponseDto mapEntityParaDto(Rifa rifa) {

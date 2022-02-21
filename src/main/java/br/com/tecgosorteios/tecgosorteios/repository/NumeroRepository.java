@@ -31,6 +31,18 @@ public interface NumeroRepository extends JpaRepository<Numero, Long> {
 	public Optional<List<Numero>> encontrarTodosNumerosPorRifaEStatus(Long rifa, String status);
 	
 	@Query(nativeQuery = true,
+			value = "SELECT COUNT(*) FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 AND status = ?2")
+	public Long encontrarQtdeNumerosPorRifaEStatus(Long id, String status);
+
+	@Query(nativeQuery = true,
 			value = "SELECT * FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 order by numero")
 	public Optional<List<Numero>> encontrarTodosNumerosPorRifa(Long id);
+
+	@Query(nativeQuery = true,
+			value = "SELECT * FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 AND usuario_id = ?2")
+	public Optional<List<Numero>> encontrarTodosNumerosMeusPorRifa(Long id, Long idUsuario);
+	
+	@Query(nativeQuery = true,
+			value = "SELECT COUNT(*) FROM tecgo_sorteios.tbl_numeros WHERE rifa_id = ?1 AND usuario_id = ?2")
+	public Long encontrarQtdeNumerosMeusPorRifa(Long id, Long idUsuarioLogado);
 }

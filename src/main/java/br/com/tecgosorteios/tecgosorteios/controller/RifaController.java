@@ -103,4 +103,32 @@ public class RifaController {
 		ResponseEntity<?> responseEntity = rifaService.encontrarTodosNumerosPorRifa(id);
 		return responseEntity;
 	}
+	
+	@GetMapping("/find-numeros-status/{id}/{status}")
+	@ResponseBody
+	public ResponseEntity<?> encontrarTodosNumerosPorRifaEStatus(@PathVariable Long id, @PathVariable String status) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarTodosNumerosPorRifaEStatus(id, status);
+		return responseEntity;
+	}
+
+	@GetMapping("/find-qtde-numeros-por-rifa-e-status/{id}/{idUsuarioLogado}")
+	@ResponseBody
+	public ResponseEntity<?> encontrarQtdeNumerosPorRifaEStatus(@PathVariable Long id, @PathVariable Long idUsuarioLogado) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarQtdeNumerosPorRifaEStatus(id, idUsuarioLogado);
+		return responseEntity;
+	}
+	
+	@GetMapping("/find-numeros-meus/{id}/{idUsuario}")
+	@ResponseBody
+	public ResponseEntity<?> encontrarTodosNumerosMeusPorRifa(@PathVariable Long id, @PathVariable Long idUsuario) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarTodosNumerosMeusPorRifa(id, idUsuario);
+		return responseEntity;
+	}
+	
+	@PostMapping("/find-usuarios")
+	@ResponseBody
+	public ResponseEntity<?> encontrarTodosUsuariosPorRifa(@RequestBody JSONObject requestBody) {
+		ResponseEntity<?> responseEntity = rifaService.encontrarTodosUsuariosPorRifa(requestBody);
+		return responseEntity;
+	}
 }
