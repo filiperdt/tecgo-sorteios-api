@@ -18,6 +18,5 @@ public class UsuarioResponseDto {
 	private String nome;
 	private String sobrenome;
 	private String email;
-	private String senha;
 	private String telefone;
 }

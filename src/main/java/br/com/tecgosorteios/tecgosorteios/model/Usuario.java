@@ -41,9 +41,9 @@ public class Usuario {
 	private String sobrenome;
 	@Column(nullable = false)
 	private String email;
-	@Column(nullable = false, length = 500)
+	@Column(nullable = false)
 	private String senha;
-	@Column(nullable = false, length = 18)
+	@Column(nullable = false, length = 15)
 	private String telefone;
 	
 	@JsonBackReference

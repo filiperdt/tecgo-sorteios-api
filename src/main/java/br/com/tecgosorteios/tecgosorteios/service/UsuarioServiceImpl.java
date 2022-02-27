@@ -142,8 +142,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 		.nome(usuario.getNome())
 		.sobrenome(usuario.getSobrenome())
 		.email(usuario.getEmail())
-		.senha(usuario.getSenha())
-		.telefone(usuario.getSenha())
+		.telefone(usuario.getTelefone())
 		.build();
 		
 		return usuarioResponseDto;
